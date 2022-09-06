@@ -3,67 +3,56 @@ from pathlib import Path
 import streamlit as st
 import matplotlib.pyplot as plt
 
-from spectators.spectator_class import initialise_spectators, Spectator
-from matches.match_report import load_in_match_report, initialise_match
-
-def data_visualisation():
-    path_to_activity = Path(__file__).parent.parent.parent / "data" / "reduced_files"
-    path_to_demographics = Path(__file__).parent.parent.parent / "data" / "GENEActiv - soccer match - LIV-MANU - 2022-04-19.csv"
-    path_to_match_reports = Path(__file__).parent.parent.parent / "data" / "game_report.csv"
+from spectators.spectator_class import Spectator
 
 
-    def extract_selectable_teams(spectators: List[Spectator]):
-        spectators_teams = list(set([spectator.supported_team for spectator in spectators]))
-        return sorted([(team, team) if team != "All" else (team, None) for team in spectators_teams + ["All"]])
+def extract_selectable_teams(spectators: List[Spectator]):
+    spectators_teams = list(set([spectator.supported_team for spectator in spectators]))
+    return sorted([(team, team) if team != "All" else (team, None) for team in spectators_teams + ["All"]])
 
 
-    def get_spectator(spectator_id: str, spectators_list):
-        if spectators:
-            return [spectator for spectator in spectators_list if spectator.id == spectator_id][0]
-        return None
+def get_spectator(spectator_id: str, spectators_list):
+    if spectators_list:
+        return [spectator for spectator in spectators_list if spectator.id == spectator_id][0]
+    return None
 
 
-    def team_filter(spectators: List[Spectator], team_filter: Tuple):
-        if team_filter[1]:
-            return [spectator.id for spectator in spectators if spectator.supported_team == team_filter[1]]
-        return [spectator.id for spectator in spectators]
+def team_filter(spectators: List[Spectator], team_filter: Tuple):
+    if team_filter[1]:
+        return [spectator.id for spectator in spectators if spectator.supported_team == team_filter[1]]
+    return [spectator.id for spectator in spectators]
 
 
-    def gender_filter(spectators: List[Spectator], gender_filter: Tuple):
-        if gender_filter[1]:
-            return [spectator.id for spectator in spectators if spectator.gender == gender_filter[1]]
-        return [spectator.id for spectator in spectators]
+def gender_filter(spectators: List[Spectator], gender_filter: Tuple):
+    if gender_filter[1]:
+        return [spectator.id for spectator in spectators if spectator.gender == gender_filter[1]]
+    return [spectator.id for spectator in spectators]
 
 
-    def filter_spectators(spectators, filter_values: Dict):
-        age_filtered = set([spectator.id for spectator in spectators if (spectator.age <= filter_values["age"][1]) and
-                           (spectator.age >= filter_values["age"][0])])
-        team_filtered = set(team_filter(spectators, filter_values["team"]))
-        gender_filtered = set(gender_filter(spectators, filter_values["gender"]))
-        filtered_lists = age_filtered & team_filtered & gender_filtered
-        if filtered_lists:
-            return filtered_lists
-        return None
+def filter_spectators(spectators, filter_values: Dict):
+    age_filtered = set([spectator.id for spectator in spectators if (spectator.age <= filter_values["age"][1]) and
+                        (spectator.age >= filter_values["age"][0])])
+    team_filtered = set(team_filter(spectators, filter_values["team"]))
+    gender_filtered = set(gender_filter(spectators, filter_values["gender"]))
+    filtered_lists = age_filtered & team_filtered & gender_filtered
+    if filtered_lists:
+        return filtered_lists
+    return None
 
 
-    @st.cache
-    def init_spectators(path_to_activity: Path, path_to_demographics: Path):
-        return initialise_spectators(path_to_activity, path_to_demographics)
+def data_visualisation(spectators, match):
+
+    #@st.cache
+    #def init_spectators(path_to_activity: Path, path_to_demographics: Path):
+    #    return initialise_spectators(path_to_activity, path_to_demographics)
 
 
-    @st.cache
-    def init_match(path_to_match_reports: Path):
-        reports = load_in_match_report(path_to_match_reports)
-        return initialise_match("2022-04-19 21:00:00", reports)
+    #@st.cache
+    #def init_match(path_to_match_reports: Path):
+    #    reports = load_in_match_report(path_to_match_reports)
+    #    return initialise_match("2022-04-19 21:00:00", reports)
 
-
-    st.set_page_config(layout="wide")
-    #configuration of the page
     st.title('Emotional Arousment Extraction of a Soccer Game')
-
-    spectators = init_spectators(path_to_activity, path_to_demographics)
-    match = init_match(path_to_match_reports)
-
 
     with st.sidebar:
         st.header('Select what to display')

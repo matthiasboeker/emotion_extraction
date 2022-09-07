@@ -42,16 +42,6 @@ def filter_spectators(spectators, filter_values: Dict):
 
 def data_visualisation(spectators, match):
 
-    #@st.cache
-    #def init_spectators(path_to_activity: Path, path_to_demographics: Path):
-    #    return initialise_spectators(path_to_activity, path_to_demographics)
-
-
-    #@st.cache
-    #def init_match(path_to_match_reports: Path):
-    #    reports = load_in_match_report(path_to_match_reports)
-    #    return initialise_match("2022-04-19 21:00:00", reports)
-
     st.title('Emotional Arousment Extraction of a Soccer Game')
 
     with st.sidebar:
@@ -75,7 +65,9 @@ def data_visualisation(spectators, match):
 
         show_ts = st.checkbox("Show time series", )
         show_rolling = st.checkbox("Show rolling mean",)
-        show_goals = st.checkbox("Show goals", )
+        show_goals = st.checkbox("Show goals" )
+        show_cards = st.checkbox("Show cards" )
+        show_subs = st.checkbox("Show substitutions" )
 
     st.header("Activity Time Series")
     if spectators_selected:
@@ -88,5 +80,11 @@ def data_visualisation(spectators, match):
         if show_goals:
             for goal in match.goal_events:
                 plt.axvline(goal.real_time, c="red", linewidth=1)
+        if show_cards:
+            for card in match.card_events:
+                plt.axvline(card.time, c="green", linewidth=1)
+        if show_subs:
+            for sub in match.sub_events:
+                plt.axvline(sub.real_time, c="purple", linewidth=1)
         st.pyplot(fig)
         st.table(spectators_selected.create_df_for_visualisation())

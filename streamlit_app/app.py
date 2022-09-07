@@ -2,7 +2,7 @@ from typing import Dict, List, Tuple
 from pathlib import Path
 import streamlit as st
 
-from spectators.spectator_class import initialise_spectators, Spectator
+from spectators.spectator_class import initialise_spectators
 from matches.match_report import load_in_match_report, initialise_match
 
 from streamlit_app.pages.data_visualisation_app import data_visualisation

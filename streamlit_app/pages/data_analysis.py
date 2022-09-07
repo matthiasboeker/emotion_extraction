@@ -29,8 +29,6 @@ def data_analysis(spectators, match):
         st.header('Select what to display')
         show_analysis = st.radio("Show analysis", ("Show correlation matrix", "Show distributions", 
                                                    "Decompose time series", "Autocorrelation"))
-
-    st.header("Analysis")
     if show_analysis == "Show correlation matrix":
         fig_corr, ax = plt.subplots(figsize=(7,5))
         sns.heatmap(correlation_matrix, ax=ax,annot=True, annot_kws={
@@ -40,23 +38,21 @@ def data_analysis(spectators, match):
             })
         st.pyplot(fig_corr)
     if show_analysis == "Show distributions":
-        fig, axs = plt.subplots(nrows=5, ncols=2, figsize=(15, 12))
+        fig_dist, axs = plt.subplots(nrows=5, ncols=2, figsize=(15, 12))
         plt.subplots_adjust(hspace=0.5)
-        fig.suptitle("Time Series Distributions", fontsize=18, y=0.95)
+        fig_dist.suptitle("Time Series Distributions", fontsize=18)
         
         for ticker, ax in zip(ts_df.columns, axs.ravel()):
             ax.hist(ts_df[str(ticker)].rolling(60).mean()[60:], bins=20, density = True, edgecolor='black',
                     linewidth=0.5, alpha = 0.9,)
 
             ax.set_title(str(ticker))
-
-        st.pyplot(fig)
-        #fig = sns.pairplot(ts_df.rolling(60).mean()[60:])
-        #st.pyplot(fig)
+        fig_dist.tight_layout()
+        st.pyplot(fig_dist)
 
     if show_analysis == "Decompose time series":
         selected_id = st.sidebar.selectbox("Select Spectator", decomposed_ts.keys())
-        fig, (ax_trend, ax_season, ax_resid) = plt.subplots(3, 1, figsize=(10, 7))
+        fig_decomp, (ax_trend, ax_season, ax_resid) = plt.subplots(3, 1, figsize=(10, 7))
         ax_trend.plot(decomposed_ts[selected_id].trend)
         ax_trend.set_title("Trend")
         ax_season.plot(decomposed_ts[selected_id].seasonal)
@@ -66,7 +62,7 @@ def data_analysis(spectators, match):
             decomposed_ts[selected_id].resid,
             marker=".")
         ax_resid.set_title("Residuals")
-        st.pyplot(fig)
+        st.pyplot(fig_decomp)
         spectators_selected = get_spectator(selected_id, spectators)
         st.table(spectators_selected.create_df_for_visualisation())
 

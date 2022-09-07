@@ -35,13 +35,7 @@ class Offside:
 @dataclass
 class YellowCard:
     time: int
-
-
-@dataclass
-class RedCard:
-    time: str
-
-
+    
 @dataclass
 class RedCard:
     time: str
@@ -55,6 +49,7 @@ class GoalShot:
 @dataclass
 class Substitution:
     time: str
+    real_time: int = 0  # pd.DatetimeIndex = pd.to_datetime("2022-04-19 21:00:00")
 
 
 @dataclass
@@ -65,6 +60,7 @@ class Match:
     end_time: pd.DatetimeIndex
     goal_events: List[Goal]
     card_events: List[YellowCard]
+    sub_events: List[Substitution]
 
 
 def clean_report(text_report: str) -> List[str]:
@@ -104,7 +100,14 @@ def initialise_match(start_time: str, reports):
     end_time = second_half_begin + pd.Timedelta(minutes=49)
     goals = []
     cards = []
-    for yellow_card in [87+15, 88+15, 89+15]:
+    subs = []
+    for sub in initialise_subs(reports):
+        if int(sub.time) > 46:
+            subs.append(replace(sub, real_time=(int(sub.time) + 16) * 60))
+        else:
+            subs.append(replace(sub, real_time=int(sub.time) * 60))
+            
+    for yellow_card in [87+16, 88+16, 89+16]:
         cards.append(YellowCard(yellow_card*60))
     for goal in initialise_goals(reports):
         if int(goal.time) > 46:
@@ -117,8 +120,15 @@ def initialise_match(start_time: str, reports):
                  second_half_begin,
                  end_time,
                  goals,
-                 cards)
+                 cards, 
+                 subs)
 
+
+def initialise_subs(reports):
+    substitutions = []
+    for substitution in keyword_search(keyword_dicts["substitution"], reports):
+        substitutions.append(Substitution(substitution))
+    return substitutions
 
 def initialise_goals(reports):
     goal_events = []

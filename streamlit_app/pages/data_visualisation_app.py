@@ -61,7 +61,7 @@ def filter_spectators(spectators, filter_values: Dict):
     return None
 
 
-def data_visualisation(spectators, match):
+def data_visualisation(spectators, match, spec_obj):
 
     st.title("Emotional Arousment Extraction of a Soccer Game")
 

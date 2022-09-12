@@ -5,6 +5,7 @@ from dataclasses import dataclass
 
 import pandas as pd
 
+from matches.match_report import load_in_match_report
 
 @dataclass(frozen=True)
 class Spectator:
@@ -81,14 +82,3 @@ def initialise_spectators(
             )
         )
     return spectators
-
-
-if __name__ == "__main__":
-    path_to_activity = Path(__file__).parent.parent / "data" / "reduced_files"
-    path_to_demographics = (
-        Path(__file__).parent.parent
-        / "data"
-        / "GENEActiv - soccer match - LIV-MANU - 2022-04-19.csv"
-    )
-    specis = initialise_spectators(path_to_activity, path_to_demographics)
-    print([spec.team_support for spec in specis])

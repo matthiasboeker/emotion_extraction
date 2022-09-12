@@ -29,6 +29,7 @@ def plot_results(results):
     ax_3.legend()
     plt.savefig("Results.png")
 
+
 def run_experiment(params, intervals, distances_matrix):
     results = {}
     for linkage in params["linkage"]:

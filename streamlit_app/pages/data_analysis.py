@@ -8,16 +8,9 @@ import numpy as np
 from statsmodels.tsa.seasonal import seasonal_decompose
 
 from streamlit_app.pages.data_visualisation_app import get_spectator
-from spectators.spectator_class import Spectator
 
 
-def normalise_series(series: pd.Series):
-    series_max = min(series)
-    series_min = max(series)
-    return series.apply(lambda x: (x - series_max) / (series_max - series_min))
-
-
-def data_analysis(spectators, match):
+def data_analysis(spectators, match, ssa_objs):
     st.title("Data Analysis")
     ts_df = pd.DataFrame(
         np.array([spectator.activity for spectator in spectators]).T,
@@ -45,6 +38,7 @@ def data_analysis(spectators, match):
                 "Show distributions",
                 "Decompose time series",
                 "Autocorrelation",
+                "Singular Spectrum Analysis",
             ),
         )
     if show_analysis == "Show correlation matrix":
@@ -97,9 +91,18 @@ def data_analysis(spectators, match):
     if show_analysis == "Autocorrelation":
         selected_id = st.sidebar.selectbox("Select Spectator", decomposed_ts.keys())
         fig_acf, ax = plt.subplots(1, 1, figsize=(5, 3))
-        ax.acorr(ts_df[selected_id], usevlines=True, normed=True, maxlags=60, lw=2)
+        ax.acorr(ts_df[selected_id].astype("float64"), usevlines=True, normed=True, maxlags=60, lw=2)
         _, right_x = ax.get_xlim()
         ax.set_xlim(0, right_x)
         st.pyplot(fig_acf)
+        spectators_selected = get_spectator(selected_id, spectators)
+        st.table(spectators_selected.create_df_for_visualisation())
+
+    if show_analysis == "Singular Spectrum Analysis":
+        selected_id = st.sidebar.selectbox("Select Spectator", decomposed_ts.keys())
+        selected_spectaror = ssa_objs[selected_id]
+        fig_ssa, ax = plt.subplots(1, 1, figsize=(5, 3))
+        sns.heatmap(selected_spectaror.factorised_matrix)
+        st.pyplot(fig_ssa)
         spectators_selected = get_spectator(selected_id, spectators)
         st.table(spectators_selected.create_df_for_visualisation())

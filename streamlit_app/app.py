@@ -2,6 +2,7 @@ from typing import Dict, List, Tuple
 from pathlib import Path
 import streamlit as st
 import sys
+sys.path.append(str(Path(__file__).parent.parent))
 
 from spectators.spectator_class import initialise_spectators, Spectator
 from matches.match_report import load_in_match_report, initialise_match
@@ -10,7 +11,6 @@ from ssa_factorisation.factorise_ssa_matrices import SSA
 from streamlit_app.pages.data_visualisation_app import data_visualisation
 from streamlit_app.pages.data_analysis import data_analysis
 
-sys.path.append(str(Path(__file__).parent.parent))
 
 path_to_activity = Path(__file__).parent.parent / "data" / "reduced_files"
 path_to_demographics = (

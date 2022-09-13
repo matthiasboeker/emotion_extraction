@@ -343,6 +343,7 @@ numpy = [
     {version = ">=1.18.5", markers = "platform_machine != \"aarch64\" and platform_machine != \"arm64\" and python_version < \"3.10\""},
     {version = ">=1.19.2", markers = "platform_machine == \"aarch64\" and python_version < \"3.10\""},
     {version = ">=1.20.0", markers = "platform_machine == \"arm64\" and python_version < \"3.10\""},
+    {version = ">=1.21.0", markers = "python_version >= \"3.10\""},
 ]
 python-dateutil = ">=2.8.1"
 pytz = ">=2020.1"
@@ -821,8 +822,8 @@ testing = ["func-timeout", "jaraco.itertools", "pytest (>=6)", "pytest-black (>=
 
 [metadata]
 lock-version = "1.1"
-python-versions = "3.8.13"
-content-hash = "62075b5de1209e2f1bb166a6feab234fba8becab268831821339e486d345b970"
+python-versions = ">=3.8.14,<3.9.7 || >3.9.7,<3.12"
+content-hash = "3d7339792ce3dbd37971b0f38346ee732faa84eca9ff1b74b57d59788b2084c7"
 
 [metadata.files]
 altair = [

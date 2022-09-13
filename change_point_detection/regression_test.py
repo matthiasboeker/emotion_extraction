@@ -10,7 +10,6 @@ from scipy.stats import f
 from change_point_detection.clustering import Interval
 
 
-
 def visual_eval_regression(regression_data, results):
     fig, (ax1, ax2, ax3) = plt.subplots(ncols=1, nrows=3, figsize=(15, 10))
     ax1.scatter(regression_data["x_t"], regression_data["x_t-1"], marker="x", c="black", label="1")
@@ -42,7 +41,7 @@ def calculate_f_statistic(combined_results, result_part_one, result_part_two):
     f_statistic_denominator = (result_part_one.ssr + result_part_two.ssr)/\
                               (len(result_part_one.params)+len(result_part_two.params)+2*number_model_params)
     return 1-f.cdf(f_statistic_numerator/f_statistic_denominator,
-                   len(combined_results.params), len(result_part_one.params)+len(result_part_two.params))
+                   len(combined_results.resid), len(result_part_one.resid))
 
 
 def calculate_f_statistics(intervals: List[Interval]):

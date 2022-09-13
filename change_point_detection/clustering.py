@@ -8,8 +8,8 @@ import matplotlib.pyplot as plt
 import seaborn as sn
 
 
-from matches.match_report import load_in_match_report, initialise_match, Match
-from spectators.spectator_class import initialise_spectators, Spectator
+from matches.match_report import Match
+from spectators.spectator_class import Spectator
 
 
 @dataclass

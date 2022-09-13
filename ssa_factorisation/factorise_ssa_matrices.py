@@ -19,10 +19,10 @@ def get_trajectory_matrix(
     return traj_matrix
 
 
-#def get_lag_cov_matrix(trajectory_matrix: np.array):
-#    return (
-#        np.matmul(trajectory_matrix, trajectory_matrix.T) / trajectory_matrix.shape[1]
-#    )
+def get_lag_cov_matrix(trajectory_matrix: np.array):
+    return (
+        np.matmul(trajectory_matrix, trajectory_matrix.T) / trajectory_matrix.shape[1]
+    )
 
 
 def diagonal_averaging(matrix: np.ndarray) -> np.ndarray:
@@ -74,7 +74,7 @@ class SSA:
 
     @classmethod
     def fit(cls, trajectory_matrix: np.ndarray, q):
-        lag_cov_matrix = trajectory_matrix #get_lag_cov_matrix(trajectory_matrix)
+        lag_cov_matrix = get_lag_cov_matrix(trajectory_matrix)
         svd_results = apply_svd(lag_cov_matrix)
         return cls(sum_elementary_matrices(svd_results, lag_cov_matrix, q))
 

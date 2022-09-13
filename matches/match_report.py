@@ -140,9 +140,3 @@ def initialise_goals(reports):
     for goal_time in keyword_search(keyword_dicts["goal"], reports):
         goal_events.append(Goal(goal_time))
     return goal_events
-
-
-if __name__ == "__main__":
-    path_to_match_reports = Path(__file__).parent.parent / "data" / "game_report.csv"
-    reports = load_in_match_report(path_to_match_reports)
-    match = initialise_match("2022-04-19 21:00:00", reports)

@@ -104,6 +104,7 @@ def data_visualisation(spectators, match, spec_obj):
         show_goals = st.checkbox("Show goals")
         show_cards = st.checkbox("Show cards")
         show_subs = st.checkbox("Show substitutions")
+        show_half_time = st.checkbox("Show half time break")
 
     st.header("Activity Time Series")
     if spectators_selected:
@@ -122,5 +123,8 @@ def data_visualisation(spectators, match, spec_obj):
         if show_subs:
             for sub in match.sub_events:
                 plt.axvline(sub.real_time, c="purple", linewidth=1)
+        if show_half_time:
+            plt.axvline(46*60, c="black", linewidth=1)
+            plt.axvline((46+15)*60, c="black", linewidth=1)
         st.pyplot(fig)
         st.table(spectators_selected.create_df_for_visualisation())

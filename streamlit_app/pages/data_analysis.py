@@ -23,7 +23,7 @@ def data_analysis(spectators, match, ssa_objs):
         zip(
             [spectator.id for spectator in spectators],
             ts_df.apply(
-                lambda x: seasonal_decompose(x, model="additive", period=60 * 10),
+                lambda x: seasonal_decompose(x, model="additive", period=60 * 25),
                 axis=0,
             ),
         )
@@ -37,8 +37,8 @@ def data_analysis(spectators, match, ssa_objs):
                 "Show correlation matrix",
                 "Show distributions",
                 "Decompose time series",
-                "Autocorrelation",
-                "Singular Spectrum Analysis",
+                #"Autocorrelation",
+                #"Singular Spectrum Analysis",
             ),
         )
     if show_analysis == "Show correlation matrix":
@@ -84,25 +84,26 @@ def data_analysis(spectators, match, ssa_objs):
             marker=".",
         )
         ax_resid.set_title("Residuals")
+        fig_decomp.tight_layout()
         st.pyplot(fig_decomp)
         spectators_selected = get_spectator(selected_id, spectators)
         st.table(spectators_selected.create_df_for_visualisation())
 
-    if show_analysis == "Autocorrelation":
-        selected_id = st.sidebar.selectbox("Select Spectator", decomposed_ts.keys())
-        fig_acf, ax = plt.subplots(1, 1, figsize=(5, 3))
-        ax.acorr(ts_df[selected_id].astype("float64"), usevlines=True, normed=True, maxlags=60, lw=2)
-        _, right_x = ax.get_xlim()
-        ax.set_xlim(0, right_x)
-        st.pyplot(fig_acf)
-        spectators_selected = get_spectator(selected_id, spectators)
-        st.table(spectators_selected.create_df_for_visualisation())
+    #if show_analysis == "Autocorrelation":
+    #    selected_id = st.sidebar.selectbox("Select Spectator", decomposed_ts.keys())
+    #    fig_acf, ax = plt.subplots(1, 1, figsize=(5, 3))
+    #    ax.acorr(ts_df[selected_id].astype("float64"), usevlines=True, normed=True, maxlags=60, lw=2)
+    #    _, right_x = ax.get_xlim()
+    #    ax.set_xlim(0, right_x)
+    #    st.pyplot(fig_acf)
+    #    spectators_selected = get_spectator(selected_id, spectators)
+    #    st.table(spectators_selected.create_df_for_visualisation())
 
-    if show_analysis == "Singular Spectrum Analysis":
-        selected_id = st.sidebar.selectbox("Select Spectator", decomposed_ts.keys())
-        selected_spectaror = ssa_objs[selected_id]
-        fig_ssa, ax = plt.subplots(1, 1, figsize=(5, 3))
-        sns.heatmap(selected_spectaror.factorised_matrix)
-        st.pyplot(fig_ssa)
-        spectators_selected = get_spectator(selected_id, spectators)
-        st.table(spectators_selected.create_df_for_visualisation())
+    #if show_analysis == "Singular Spectrum Analysis":
+    #    selected_id = st.sidebar.selectbox("Select Spectator", decomposed_ts.keys())
+    #    selected_spectaror = ssa_objs[selected_id]
+    #    fig_ssa, ax = plt.subplots(1, 1, figsize=(5, 3))
+    #    sns.heatmap(selected_spectaror.factorised_matrix)
+    #    st.pyplot(fig_ssa)
+    #    spectators_selected = get_spectator(selected_id, spectators)
+    #    st.table(spectators_selected.create_df_for_visualisation())

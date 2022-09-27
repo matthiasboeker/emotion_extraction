@@ -80,7 +80,9 @@ def get_feature_df(spectators, goal_times, control_times, feature_functions):
     ).fillna(method="ffill")
 
 
-def get_train_test_split(feature_df, test_size):
+def get_train_test_split(feature_df: pd.DataFrame, test_size: float, simple_labels: bool, **kwargs):
     labels = feature_df[["id", "goal", "control"]]
-    feature_df.drop(["control", "id", "goal"], axis=1)
-    return train_test_split(feature_df, labels, test_size=test_size)
+    if simple_labels:
+        labels = feature_df["control"]
+    output_df = feature_df.drop(["control", "id", "goal"], axis=1)
+    return train_test_split(output_df, labels, test_size=test_size, **kwargs)

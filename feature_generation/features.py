@@ -13,11 +13,11 @@ def ts_std(activity_interval):
 
 
 def ts_skew(activity_interval):
-    return skew(activity_interval)
+    return skew(activity_interval.diff()[1:])
 
 
 def ts_kurtosis(activity_interval):
-    return kurtosis(activity_interval)
+    return kurtosis(activity_interval.diff()[1:])
 
 
 def ts_entropy(activity_interval):
@@ -45,10 +45,7 @@ def ts_rmsd(activity_interval):
 
 
 def max_peak(activity_interval):
-    activity_interval = activity_interval.reset_index(drop=True)
-    if activity_interval[find_peaks(activity_interval)[0]].empty:
-        return 0
-    return max(activity_interval[find_peaks(activity_interval)[0]])
+    return max(activity_interval)
 
 
 def ts_spectral_centroid(signal):

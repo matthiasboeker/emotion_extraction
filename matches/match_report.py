@@ -111,17 +111,17 @@ def initialise_match(start_time: str, reports):
     subs = []
     for sub in initialise_subs(reports):
         if int(sub.time) > 46:
-            subs.append(replace(sub, real_time=(int(sub.time) + 16) * 60))
+            subs.append(replace(sub, real_time=(int(sub.time) + 16) * 600))
         else:
-            subs.append(replace(sub, real_time=int(sub.time) * 60))
+            subs.append(replace(sub, real_time=int(sub.time) * 60*100))
 
     for yellow_card in [87 + 16, 88 + 16, 89 + 16]:
-        cards.append(YellowCard(yellow_card * 60))
+        cards.append(YellowCard(yellow_card * 60*100))
     for goal in initialise_goals(reports):
         if int(goal.time) > 46:
-            goals.append(replace(goal, real_time=(int(goal.time) + 16) * 60))
+            goals.append(replace(goal, real_time=(int(goal.time) + 16) * 60*100))
         else:
-            goals.append(replace(goal, real_time=int(goal.time) * 60))
+            goals.append(replace(goal, real_time=int(goal.time) * 60*100))
         # goals.append(replace(goal, real_time=start_time+pd.Timedelta(minutes=int(goal.time))))
     return Match(
         start_time, half_time_begin, second_half_begin, end_time, goals, cards, subs

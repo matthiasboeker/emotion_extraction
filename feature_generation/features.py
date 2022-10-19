@@ -13,11 +13,11 @@ def ts_std(activity_interval):
 
 
 def ts_skew(activity_interval):
-    return skew(activity_interval.diff()[1:])
+    return skew(activity_interval)
 
 
 def ts_kurtosis(activity_interval):
-    return kurtosis(activity_interval.diff()[1:])
+    return kurtosis(activity_interval)
 
 
 def ts_entropy(activity_interval):
@@ -37,7 +37,7 @@ def number_peaks(activity_interval):
 
 
 def ts_complexity(activity_interval):
-    return np.sqrt(activity_interval.diff()[1:].apply(lambda x: x ** 2).mean())
+    return np.sqrt(activity_interval.diff().loc[1:].apply(lambda x: x ** 2).mean())
 
 
 def ts_rmsd(activity_interval):

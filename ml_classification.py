@@ -6,12 +6,13 @@ import numpy as np
 import matplotlib.pyplot as plt
 from sklearn.metrics import matthews_corrcoef, roc_auc_score, accuracy_score
 
-from sklearn.linear_model import LogisticRegression
+from sklearn.linear_model import LogisticRegression, lasso_path
 from sklearn.decomposition import PCA
 from sklearn.svm import SVC
 from sklearn.ensemble import AdaBoostClassifier
 from sklearn.neighbors import KNeighborsClassifier
 from sklearn.naive_bayes import GaussianNB
+from sklearn.ensemble import RandomForestClassifier
 from sklearn.discriminant_analysis import LinearDiscriminantAnalysis
 from sklearn.dummy import DummyClassifier
 from mlxtend.evaluate import combined_ftest_5x2cv
@@ -184,7 +185,7 @@ def main():
         goal_times,
         control_times,
         feature_functions={
-            "nr_peaks": number_peaks,
+             "nr_peaks": number_peaks,
              "max_peak": max_peak,
              "abs_dev": ts_abs_dev,
              "skewness": ts_skew,
@@ -195,24 +196,27 @@ def main():
              "complexity": ts_complexity,
              "rms": ts_rmsd,
         },
+        sub_intervals=10
     )
-
     X_train, y_train = get_train_test_split(
         feature_df,
         test_size=0,
         simple_labels=True,
         shuffle=True,
         scaling=True,
-        random_state=0,
+        random_state=1,
     )
     feature_models = {
         "log_reg": LogisticRegression(penalty="l1", solver="liblinear", random_state=0),
         "svc": SVC(C=1, kernel="rbf", random_state=0),
-        "ada_boost": AdaBoostClassifier(n_estimators=50, random_state=0),
+        "ada_boost": AdaBoostClassifier(n_estimators=100, random_state=0),
         "knn": KNeighborsClassifier(n_neighbors=10),
         "naive_b": GaussianNB(),
         "discriminant": LinearDiscriminantAnalysis(solver="eigen", shrinkage="auto"),
+        "decision_forest": RandomForestClassifier(random_state=0)
+
     }
+    feature_selection(lasso_path, X_train, y_train, path_to_figures)
     strategy = "stratified"
     clf_dummy = DummyClassifier(strategy=strategy, random_state=0)
     res_2x5cv = apply_2x5cv(clf_dummy, feature_models, X_train, y_train)
@@ -247,7 +251,7 @@ def main():
             y=y_train,
             folds=10,
             repetitions=rep,
-            score=accuracy_score,
+           score=accuracy_score,
             score_level=0.5,
         )
         res.append(res_tailed_test)

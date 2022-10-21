@@ -155,3 +155,5 @@ cython_debug/
 
 .csv
 .DS_Store
+
+.png

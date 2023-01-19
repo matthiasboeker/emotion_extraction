@@ -149,9 +149,12 @@ dmypy.json
 
 # pytype static type analyzer
 .pytype/
+.pkl
 
 # Cython debug symbols
 cython_debug/
 
 .csv
 .DS_Store
+
+.png

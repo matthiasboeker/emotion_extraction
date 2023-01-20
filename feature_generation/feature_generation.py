@@ -52,7 +52,6 @@ def get_intervals_for_spectators(
     res = []
     for spectator in spectators:
         res.append(get_interval(spectator, goal_times, extra_range))
-
     return res
 
 

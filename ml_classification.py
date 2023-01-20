@@ -6,7 +6,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from sklearn.metrics import matthews_corrcoef, roc_auc_score, accuracy_score, cohen_kappa_score
 
-from sklearn.linear_model import LogisticRegression
+from sklearn.linear_model import LogisticRegression, lasso_path
 from sklearn.decomposition import PCA
 from sklearn.svm import SVC
 from sklearn.ensemble import AdaBoostClassifier
@@ -252,7 +252,7 @@ def main():
             y=y_train,
             folds=10,
             repetitions=rep,
-            score=accuracy_score,
+           score=accuracy_score,
             score_level=0.5,
         )
         res.append(res_tailed_test)

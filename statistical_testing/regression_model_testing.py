@@ -6,7 +6,15 @@ import matplotlib.pyplot as plt
 
 import scipy.stats as st
 from sklearn.preprocessing import OneHotEncoder
-from sklearn.model_selection import StratifiedKFold
+from sklearn.model_selection import StratifiedKFold, StratifiedGroupKFold
+from sklearn.feature_selection import SelectKBest
+from sklearn.feature_selection import mutual_info_classif
+
+
+def feature_selection(X_train, y_train):
+    X_train /= X_train.std(axis=0)
+    feature_importance = SelectKBest(mutual_info_classif, k=3).fit(X_train, y_train)
+    return feature_importance.get_feature_names_out(X_train.columns)
 
 
 def calculate_t_statistic(mean_val, variance, folds, repetitions, test_size, train_size):
@@ -38,23 +46,33 @@ def one_tailed_k_fold_cv_test(
     score_level
 ):
     scores_diff_per_rep = []
+    pred_cvs_reps = []
     for repetition in range(0, repetitions):
-        cross_validation = StratifiedKFold(n_splits=folds, shuffle=True, random_state=repetition)
+        cross_validation = StratifiedGroupKFold(n_splits=folds, shuffle=True, random_state=repetition)
         scores_diff_per_cv = []
-        for split, (train_index, test_index) in enumerate(cross_validation.split(X, y)):
+        ids = X["id"]
+        X_ = X.drop(["id"], axis=1)
+        pred_cv = []
+        for split, (train_index, test_index) in enumerate(cross_validation.split(X_, y, ids)):
             X_cv_train, X_cv_test = X.loc[train_index, :], X.loc[test_index, :]
             y_cv_train, y_cv_test = y.loc[train_index], y.loc[test_index]
+            feat = feature_selection(X_cv_train, y_cv_train)
+            X_cv_train = X_cv_train.loc[:, feat]
+            X_cv_test = X_cv_test.loc[:, feat]
             classifier.fit(X_cv_train, y_cv_train)
             predictions = classifier.predict(X_cv_test)
+            pred_cv.append(score(y_cv_test, predictions))
             scores_diff_per_cv.append(
                 score(y_cv_test, predictions)-score_level
             )
         scores_diff_per_rep.append(scores_diff_per_cv)
+        pred_cvs_reps.append(np.mean(pred_cv))
+    #print(f"Mean {score.__name__}: {np.mean(pred_cvs_reps)}")
     mean_val = estimate_sample_mean(scores_diff_per_rep, folds, repetitions)
     variance = estimate_sample_variance(scores_diff_per_rep, mean_val, folds, repetitions)
     t_statistic = calculate_t_statistic(mean_val, variance, folds, repetitions, len(X_cv_test), len(X_cv_train))
     pval = 1 - st.t.cdf(t_statistic, folds * repetitions - 1)
-    return pval
+    return pval, pred_cvs_reps
 
 
 def paired_k_fold_cv_test(
@@ -67,26 +85,36 @@ def paired_k_fold_cv_test(
     score: Callable[[..., ...], float],
 ):
     scores_diff_per_rep = []
+    pred_cvs_reps = []
     for repetition in range(0, repetitions):
-        cross_validation = StratifiedKFold(n_splits=folds, shuffle=True, random_state=repetition)
+        cross_validation = StratifiedGroupKFold(n_splits=folds, shuffle=True, random_state=repetition)
+        ids = X["id"]
+        X_ = X.drop(["id"], axis=1)
         scores_diff_per_cv = []
-        for split, (train_index, test_index) in enumerate(cross_validation.split(X, y)):
+        pred_cv = []
+        for split, (train_index, test_index) in enumerate(cross_validation.split(X_, y, ids)):
             X_cv_train, X_cv_test = X.loc[train_index, :], X.loc[test_index, :]
             y_cv_train, y_cv_test = y.loc[train_index], y.loc[test_index]
+            feat = feature_selection(X_cv_train, y_cv_train)
+            X_cv_train = X_cv_train.loc[:, feat]
+            X_cv_test = X_cv_test.loc[:, feat]
             classifier_a.fit(X_cv_train, y_cv_train)
             classifier_b.fit(X_cv_train, y_cv_train)
             predictions_a = classifier_a.predict(X_cv_test)
             predictions_b = classifier_b.predict(X_cv_test)
+            pred_cv.append(score(y_cv_test, predictions_b))
             scores_diff_per_cv.append(
                 score(y_cv_test, predictions_a) - score(y_cv_test, predictions_b)
             )
         scores_diff_per_rep.append(scores_diff_per_cv)
+        pred_cvs_reps.append(np.mean(pred_cv))
     mean_val = estimate_sample_mean(scores_diff_per_rep, folds, repetitions)
+    #print(f"Mean {score.__name__}: {np.mean(pred_cvs_reps)}")
     variance = estimate_sample_variance(scores_diff_per_rep, mean_val, folds, repetitions)
     t_statistic = calculate_t_statistic(mean_val, variance, folds, repetitions, len(X_cv_test),len(X_cv_train))
     pval = (1-st.t.cdf(np.abs(t_statistic), folds * repetitions - 1)) * 2
     #pval = st.t.sf(np.abs(t_statistic), len(X)*2 - 1) * 2
-    return pval
+    return pval, pred_cvs_reps
 
 
 class ConfidenceTester:

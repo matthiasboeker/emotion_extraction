@@ -21,6 +21,7 @@ scipy = "1.8.1"
 sktime = "^0.13.4"
 black = "^22.10.0"
 mlxtend = "^0.21.0"
+lime = "^0.2.0.1"
 
 [build-system]
 requires = ["poetry-core"]

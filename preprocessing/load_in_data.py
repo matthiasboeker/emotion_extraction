@@ -1,4 +1,4 @@
-from typing import Dict, Callable
+from typing import Callable, Dict, Tuple
 import os
 from pathlib import Path
 
@@ -20,25 +20,40 @@ def pca_combination(match_dataframe: pd.DataFrame) -> np.array:
     return pca.fit_transform(vectors)[:, 0]
 
 
+def vector_combination(match_dataframe: pd.DataFrame) -> np.array:
+    vectors = match_dataframe[["acc_x", "acc_y", "acc_z"]].apply(
+        lambda x: np.sqrt(x["acc_x"]**2 + x["acc_y"]**2 + x["acc_z"]**2), axis=1)
+    return vectors
+
+
+def butter_bandpass(lowcut, highcut, fs, order=5) -> Tuple[np.array, np.array]:
+    return signal.butter(order, [lowcut, highcut], fs=fs, btype='band', output='ba')
+
+
+def butter_bandpass_filter(data, lowcut, highcut, fs, order=5):
+    b, a = butter_bandpass(lowcut, highcut, fs, order=order)
+    y = signal.lfilter(b, a, data)
+    return y
+
+
 def filter_signal(
-    signal_ts: np.array, filter_object: signal, bin_array: np.array
+    signal_ts: np.array, bin_array: np.array
 ) -> np.array:
-    filtered_signal = abs(signal.sosfilt(filter_object, signal_ts))
-    return np.digitize(abs(filtered_signal), bins=bin_array)
+    filtered_signal = abs(butter_bandpass_filter(signal_ts, 10, 49, 100))
+    return filtered_signal #np.digitize(abs(filtered_signal), bins=bin_array)
 
 
 def acceleration_to_count(
     match_df: pd.DataFrame,
-    filter_object: signal,
     combination_func: Callable[[pd.DataFrame], np.array],
     bin_array=np.arange(0, 5, 0.0390625),
 ):
     combined_signal = combination_func(match_df)
-    filtered_signal = filter_signal(combined_signal, filter_object, bin_array)
+    filtered_signal = filter_signal(combined_signal, bin_array)
     return (
         pd.DataFrame(
             {
-                "time": match_df.time.apply(lambda x: x[:19]).reset_index(drop=True),
+                "time": match_df.time.apply(lambda x: x[:22]).reset_index(drop=True),
                 "signal": filtered_signal,
             }
         )
@@ -61,7 +76,7 @@ def read_in_activity_file(path_to_file):
 
 
 def store_reduced_files(
-    path_to_folder, path_to_output, match_times, filter_object, vector_combination_func
+    path_to_folder, path_to_output, match_times, vector_combination_func
 ):
     for index_nr, file_name in enumerate(
         [
@@ -74,7 +89,6 @@ def store_reduced_files(
         match_dataframe = extract_match_interval(dataframe, match_times)
         activity_count_signal = acceleration_to_count(
             match_dataframe,
-            filter_object,
             vector_combination_func,
         )
         activity_count_signal.to_csv(path_to_output / file_name)
@@ -85,7 +99,6 @@ if __name__ == "__main__":
     path_to_data = Path(__file__).parent.parent / "data"
     path_to_output = path_to_data / "reduced_files"
     match_times = {"start": "2022-04-19 21:00:00:000", "end": "2022-04-19 22:49:00:000"}
-    filter = signal.butter(5, 3, "low", fs=100, output="sos")
     store_reduced_files(
-        path_to_data, path_to_output, match_times, filter, pca_combination
+        path_to_data, path_to_output, match_times, vector_combination
     )

@@ -4,7 +4,12 @@ import pickle
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
-from sklearn.metrics import matthews_corrcoef, roc_auc_score, accuracy_score, cohen_kappa_score
+from sklearn.metrics import (
+    matthews_corrcoef,
+    roc_auc_score,
+    accuracy_score,
+    cohen_kappa_score,
+)
 
 from sklearn.linear_model import LogisticRegression, lasso_path
 from sklearn.decomposition import PCA
@@ -142,14 +147,6 @@ def sort_feature_importance(feature_names, feature_coefficients):
     )
 
 
-#def feature_selection(lasso_path, X_train, y_train, path_to_fig, eps=5e-3):
-#    X_train /= X_train.std(axis=0)
-#    alphas_lasso, coefs_lasso, _ = lasso_path(X_train, y_train, eps=eps)
-#    neg_log_alphas_lasso = -np.log10(alphas_lasso)
-#    feature_importance = sort_feature_importance(X_train.columns, coefs_lasso)
-#    return #[feature[0] for feature in feature_importance]
-
-
 def feature_selection(X_train, y_train):
     X_train /= X_train.std(axis=0)
     feature_importance = SelectKBest(mutual_info_classif, k=3).fit(X_train, y_train)
@@ -163,7 +160,6 @@ def load_in_pickle_file(path_to_pickles: Path, file_name: str):
 
 def main():
     path_to_pickles = Path(__file__).parent / "data"
-    path_to_figures = Path(__file__).parent / "figures"
     match = load_in_pickle_file(path_to_pickles, "match.pkl")
     spectators = load_in_pickle_file(path_to_pickles, "spectators.pkl")
     goal_times = [goal.real_time for goal in match.goal_events]
@@ -172,8 +168,6 @@ def main():
         "8": 48000,
         "27": 162000,
         "36": 216000,
-        #"49": 390000,
-        #"54": 420000,
     }
 
     feature_df = get_feature_df(
@@ -181,18 +175,18 @@ def main():
         goal_times,
         control_times,
         feature_functions={
-             "nr_peaks": number_peaks,
-             "max_peak": max_peak,
-             "abs_dev": ts_abs_dev,
-             "skewness": ts_skew,
-             "kurtosis": ts_kurtosis,
-             "spectral_centroid": ts_spectral_centroid,
-             "std": ts_std,
-             "mean": ts_mean,
-             "complexity": ts_complexity,
-             "rms": ts_rmsd,
+            "nr_peaks": number_peaks,
+            "max_peak": max_peak,
+            "abs_dev": ts_abs_dev,
+            "skewness": ts_skew,
+            "kurtosis": ts_kurtosis,
+            "spectral_centroid": ts_spectral_centroid,
+            "std": ts_std,
+            "mean": ts_mean,
+            "complexity": ts_complexity,
+            "rms": ts_rmsd,
         },
-        sub_intervals=10
+        sub_intervals=10,
     )
     X_train, y_train = get_train_test_split(
         feature_df,
@@ -204,8 +198,6 @@ def main():
     )
     X_train = X_train.reset_index(drop=True)
     y_train = y_train.reset_index(drop=True)
-    #X_test = X_test.reset_index(drop=True)
-    #y_test = y_test.reset_index(drop=True)
     feature_models = {
         "log_reg": LogisticRegression(penalty="l1", solver="liblinear", random_state=0),
         "svc": SVC(C=1, kernel="rbf", random_state=0),
@@ -213,54 +205,31 @@ def main():
         "knn": KNeighborsClassifier(n_neighbors=10),
         "naive_b": GaussianNB(),
         "discriminant": LinearDiscriminantAnalysis(solver="eigen", shrinkage="auto"),
-        "decision_forest": RandomForestClassifier(random_state=0)
-
+        "decision_forest": RandomForestClassifier(random_state=0),
     }
-    #feat = feature_selection(X_test, y_test)
-    #X_train = X_train.loc[:, feat]
-    strategy = "prior"
-    clf_dummy = DummyClassifier(strategy=strategy, random_state=0)
-    #res_2x5cv = apply_2x5cv(clf_dummy, feature_models, X_train, y_train)
-    #print(res_2x5cv)
-    print(
-        f"------------------------- 2X5 CV T-TEST AGAINST {strategy} DUMMY -------------------------"
-    )
-    res = []
+    res_p_values = []
+    res_acc = []
     repetitions = [1, 5, 10, 20]
     for rep in repetitions:
-        res_paired_t_test = apply_paired_t_test(
-            clf_dummy,
+        res_tailed_test, accuracy_scores = apply_tailed_t_test(
             feature_models,
             X=X_train,
             y=y_train,
             folds=10,
             repetitions=rep,
-            score=cohen_kappa_score,
-        )
-        res.append(res_paired_t_test)
-    res_paired_t_test_df = pd.DataFrame(res)
-    print(res_paired_t_test_df)
-    print(
-        f"------------------------- PAIRED T-TEST AGAINST {strategy} DUMMY -------------------------"
-    )
-    res = []
-    repetitions = [1, 5, 10, 20]
-    for rep in repetitions:
-        res_tailed_test, _ = apply_tailed_t_test(
-            feature_models,
-            X=X_train,
-            y=y_train,
-            folds=10,
-            repetitions=rep,
-           score=accuracy_score,
+            score=accuracy_score,
             score_level=0.5,
         )
-        res.append(res_tailed_test)
-    res_tailed_test_df = pd.DataFrame(res)
+        res_p_values.append(res_tailed_test)
+        res_acc.append(accuracy_scores)
+    res_accuracy_df = pd.DataFrame(res_acc)
+    res_tailed_test_df = pd.DataFrame(res_p_values)
     print(res_tailed_test_df)
     print(
         f"------------------------- ONE TAILED PAIRED T-TEST AGAINST -------------------------"
     )
+    print(res_accuracy_df)
+    print(f"------------------------- ACCURACY SCORES -------------------------")
 
 
 if __name__ == "__main__":

@@ -4,7 +4,12 @@ import pickle
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
-from sklearn.metrics import matthews_corrcoef, roc_auc_score, accuracy_score, cohen_kappa_score
+from sklearn.metrics import (
+    matthews_corrcoef,
+    roc_auc_score,
+    accuracy_score,
+    cohen_kappa_score,
+)
 
 from sklearn.linear_model import LogisticRegression, lasso_path
 from sklearn.decomposition import PCA
@@ -141,6 +146,7 @@ def sort_feature_importance(feature_names, feature_coefficients):
         reverse=True,
     )
 
+
 def feature_selection(X_train, y_train):
     X_train /= X_train.std(axis=0)
     feature_importance = SelectKBest(mutual_info_classif, k=3).fit(X_train, y_train)
@@ -169,18 +175,18 @@ def main():
         goal_times,
         control_times,
         feature_functions={
-             "nr_peaks": number_peaks,
-             "max_peak": max_peak,
-             "abs_dev": ts_abs_dev,
-             "skewness": ts_skew,
-             "kurtosis": ts_kurtosis,
-             "spectral_centroid": ts_spectral_centroid,
-             "std": ts_std,
-             "mean": ts_mean,
-             "complexity": ts_complexity,
-             "rms": ts_rmsd,
+            "nr_peaks": number_peaks,
+            "max_peak": max_peak,
+            "abs_dev": ts_abs_dev,
+            "skewness": ts_skew,
+            "kurtosis": ts_kurtosis,
+            "spectral_centroid": ts_spectral_centroid,
+            "std": ts_std,
+            "mean": ts_mean,
+            "complexity": ts_complexity,
+            "rms": ts_rmsd,
         },
-        sub_intervals=10
+        sub_intervals=10,
     )
     X_train, y_train = get_train_test_split(
         feature_df,
@@ -199,8 +205,7 @@ def main():
         "knn": KNeighborsClassifier(n_neighbors=10),
         "naive_b": GaussianNB(),
         "discriminant": LinearDiscriminantAnalysis(solver="eigen", shrinkage="auto"),
-        "decision_forest": RandomForestClassifier(random_state=0)
-
+        "decision_forest": RandomForestClassifier(random_state=0),
     }
     res_p_values = []
     res_acc = []
@@ -212,7 +217,7 @@ def main():
             y=y_train,
             folds=10,
             repetitions=rep,
-           score=accuracy_score,
+            score=accuracy_score,
             score_level=0.5,
         )
         res_p_values.append(res_tailed_test)
@@ -224,9 +229,7 @@ def main():
         f"------------------------- ONE TAILED PAIRED T-TEST AGAINST -------------------------"
     )
     print(res_accuracy_df)
-    print(
-        f"------------------------- ACCURACY SCORES -------------------------"
-    )
+    print(f"------------------------- ACCURACY SCORES -------------------------")
 
 
 if __name__ == "__main__":

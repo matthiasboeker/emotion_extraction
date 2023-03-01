@@ -21,7 +21,7 @@ poetry init
 ## Usage 
 The data is loaded, structured as objects and pickled with the script:
 
-````
+```
 emotion_extraction/pickle_objects.py
 ```
 

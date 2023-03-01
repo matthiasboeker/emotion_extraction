@@ -20,10 +20,13 @@ poetry init
 
 ## Usage 
 The data is loaded, structured as objects and pickled with the script:
+
 ````
 emotion_extraction/pickle_objects.py
 ```
+
 The machine learning experiments can be run by the script:
+
 ```
 emotion_extraction/ml_classification.py.py
 ```

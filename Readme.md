@@ -28,7 +28,7 @@ emotion_extraction/pickle_objects.py
 The machine learning experiments can be run by the script:
 
 ```
-emotion_extraction/ml_classification.py.py
+emotion_extraction/ml_classification.py
 ```
 
 
